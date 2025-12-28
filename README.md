@@ -49,10 +49,13 @@ npm run build
 # （Claude Code CLIまたはClaude Desktopから）
 /install-github-app
 
-# 3. フォークしたリポジトリでIssueを作成
+# 3. GitHubリポジトリのSettings → Secrets and variables → Actions から
+# ANTHROPIC_API_KEY を追加（https://console.anthropic.com で取得）
+
+# 4. フォークしたリポジトリでIssueを作成
 # 本文に @claude を含めると、Claudeが自動で実装してPRを作成
 
-# 4. PRを作成すると、Claudeが自動レビュー
+# 5. PRを作成すると、Claudeが自動レビュー
 ```
 
 **できること:**
