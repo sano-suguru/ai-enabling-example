@@ -96,6 +96,12 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 - **RSS解析**: rss-parser
 - **データソース**: Zenn RSS feeds
 
+## 参考リソース
+
+- [MCP公式ドキュメント](https://modelcontextprotocol.io/)
+- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+- [Zenn RSS仕様](https://zenn.dev/zenn/articles/zenn-feed-rss)
+
 ## ライセンス
 
 MIT
