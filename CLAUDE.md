@@ -76,6 +76,7 @@ npm test tools.test.ts  # Run specific test file
 - **Language**: Write all commit messages in Japanese (日本語)
 - **Format**: Use conventional commit style in Japanese
 - **No signatures**: Do not add "Generated with Claude Code" or co-author signatures
+- **No emojis**: Never use emojis in commit messages, PR descriptions, issues, or any documentation
 - **Example**: "機能追加: MCPサーバーの基本実装"
 
 ### TypeScript
