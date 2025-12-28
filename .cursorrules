@@ -1,0 +1,90 @@
+# Project Rules
+
+このファイルはCursor IDEがプロジェクトのコンテキストを理解するための指示を提供します。
+
+## プロジェクト概要
+
+Zenn記事検索MCPサーバー。TypeScriptで実装されたModel Context Protocol (MCP)サーバーです。
+
+**目的**: AI Enablingの実践サンプルとして、AIツールがプロジェクトを効果的に理解・支援できるようにする。
+
+## 技術スタック
+
+- TypeScript（strict mode）
+- Node.js 20.x (LTS)
+- MCP SDK (`@modelcontextprotocol/sdk`)
+- Zod（スキーマバリデーション）
+- rss-parser（RSS解析）
+
+## コーディング規約
+
+### TypeScript
+- TypeScript strict modeを使用
+- すべてのエクスポート関数にJSDocコメントを日本語で付ける
+- async/awaitを使用（コールバック不可）
+- 関数型プログラミングパターンを優先
+
+### コメント
+- すべてのコメントは日本語で記述
+- JSDocは日本語で記述
+- コード内のインラインコメントも日本語
+
+### Git
+- コミットメッセージは日本語
+- 絵文字は使用しない
+- Claude署名は追加しない
+- 形式: "機能追加: 〜" "修正: 〜" "ドキュメント: 〜"
+
+### エラーハンドリング
+- すべての非同期操作にtry/catchブロックを使用
+- 外部入力は必ずバリデーション
+- 意味のあるエラーメッセージを返す
+
+### ロギング
+- `console.log`は使用禁止
+- `src/utils/logger.ts`のロガーを使用
+- 適切なログレベル（debug, info, warn, error）を使用
+
+## テスト
+
+- 新規関数には単体テストを書く
+- テストファイルは `tests/` ディレクトリに配置
+- テスト名は動作を説明する日本語で記述
+
+## セキュリティ
+
+- 環境変数やシークレットをコードに直接書かない
+- 外部入力は必ずバリデーション
+- このプロジェクトは外部APIキー不要（公開RSSのみ使用）
+
+## MCPサーバー実装
+
+- `McpServer`クラスを使用（`@modelcontextprotocol/sdk/server/mcp.js`）
+- `StdioServerTransport`でClaude Desktopと統合
+- Zodバリデーターでスキーマ定義
+- ツールハンドラは`content`と`structuredContent`の両方を返す
+
+## ディレクトリ構成
+
+```
+src/
+  index.ts              # エントリーポイント
+  server.ts             # MCPサーバー実装
+  tools/                # MCPツール実装
+    list-articles.ts
+    search-articles.ts
+    get-article.ts
+  utils/                # ユーティリティ関数
+    logger.ts
+    fetcher.ts
+    rss-parser.ts
+tests/                  # テストファイル
+```
+
+## コマンド
+
+- `npm install` - 依存関係インストール
+- `npm run build` - TypeScriptビルド
+- `npm run dev` - 開発モード（watch）
+- `npm test` - テスト実行
+- `npm run lint` - ESLint実行
