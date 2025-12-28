@@ -42,7 +42,9 @@ npm run build
 
 このリポジトリをフォークして、無料のAI自動レビューを体験できます。
 
-[実際のAIレビュー例を見る →](https://github.com/sano-suguru/ai-enabling-example/pull/6#issuecomment-2566935050)
+**動作例:**
+- [AIレビューの例](https://github.com/sano-suguru/ai-enabling-example/pull/6#issuecomment-2566935050) - コード品質、セキュリティ、パフォーマンスの指摘
+- [AI自動実装の例](https://github.com/sano-suguru/ai-enabling-example/pull/8) - Issueから自動でコード生成・PR作成
 
 ```bash
 # 1. このリポジトリをGitHubでフォーク
