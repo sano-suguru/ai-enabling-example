@@ -76,13 +76,15 @@ npm test tools.test.ts  # Run specific test file
 - **Language**: Write all commit messages in Japanese (日本語)
 - **Format**: Use conventional commit style in Japanese
 - **No signatures**: Do not add "Generated with Claude Code" or co-author signatures
+- **No emojis**: Never use emojis in commit messages, PR descriptions, issues, or any documentation
 - **Example**: "機能追加: MCPサーバーの基本実装"
 
 ### TypeScript
 - Always use TypeScript with strict mode enabled
-- Add JSDoc comments to all exported functions
+- **Add JSDoc comments in Japanese (日本語)** to all exported functions
 - Use async/await for asynchronous operations (no callbacks)
 - Prefer functional programming patterns where appropriate
+- **All code comments must be in Japanese (コメントは日本語で記述)**
 
 ### MCP Server Implementation
 - Use `McpServer` class from `@modelcontextprotocol/sdk/server/mcp.js`
