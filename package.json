@@ -1,0 +1,36 @@
+{
+  "name": "zenn-article-search-mcp",
+  "version": "0.1.0",
+  "description": "Zenn Article Search MCP Server - AI Enabling sample project",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepare": "npm run build",
+    "test": "node --test",
+    "lint": "eslint src tests --ext .ts"
+  },
+  "keywords": [
+    "mcp",
+    "zenn",
+    "ai-enabling"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "rss-parser": "^3.13.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^9.18.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
