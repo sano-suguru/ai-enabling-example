@@ -40,7 +40,9 @@ npm run build
 
 ### AI自動レビューを試す（フォーク）
 
-このリポジトリをフォークして、無料のAI自動レビューを体験できます：
+このリポジトリをフォークして、無料のAI自動レビューを体験できます。
+
+[実際のAIレビュー例を見る →](https://github.com/sano-suguru/ai-enabling-example/pull/6#issuecomment-2566935050)
 
 ```bash
 # 1. このリポジトリをGitHubでフォーク
