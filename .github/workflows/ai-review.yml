@@ -35,7 +35,7 @@ jobs:
 
       - name: Run AI Code Review
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_FULL_NAME: ${{ github.repository }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -69,7 +69,7 @@ jobs:
 
       - name: Run AI Auto Implementation
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO_FULL_NAME: ${{ github.repository }}
           COMMENTER: ${{ github.event.comment.user.login }}
