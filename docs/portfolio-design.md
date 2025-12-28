@@ -34,8 +34,8 @@ ai-enabling-example/
     workflows/
       ai-review.yml              # PRレビュー + Issue自動実装（GitHub Models）
     scripts/
-      ai-review.js               # PRレビューロジック
-      ai-implement.js            # Issue自動実装ロジック
+      ai-review.cjs              # PRレビューロジック
+      ai-implement.cjs           # Issue自動実装ロジック
 ```
 
 ---
@@ -467,7 +467,7 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 1. Settings > Actions > General で権限を有効化
 2. .github/workflows/ai-review.yml 作成
-3. .github/scripts/ai-review.js, ai-implement.js 実装
+3. .github/scripts/ai-review.cjs, ai-implement.cjs 実装
 4. PRレビュー動作確認
 5. Issue自動実装動作確認
 
