@@ -15,7 +15,7 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 ```bash
 # 1. クローン
-git clone <repository-url>
+git clone https://github.com/sano-suguru/ai-enabling-example.git
 cd ai-enabling-example
 
 # 2. 依存関係のインストール
@@ -35,8 +35,30 @@ npm run build
   }
 }
 
-# 5. Claude Desktopを再起動
+# 5. Claude Desktopを再起動して、list_articlesツールを試す
 ```
+
+### CI統合を試す（フォーク）
+
+このリポジトリをフォークして、Claude Code Actionsを体験できます：
+
+```bash
+# 1. このリポジトリをGitHubでフォーク
+
+# 2. Claude Codeで以下を実行してGitHub Appをインストール
+# （Claude Code CLIまたはClaude Desktopから）
+/install-github-app
+
+# 3. フォークしたリポジトリでIssueを作成
+# 本文に @claude を含めると、Claudeが自動で実装してPRを作成
+
+# 4. PRを作成すると、Claudeが自動レビュー
+```
+
+**できること:**
+- PRの自動レビュー
+- Issueからの自動実装・PR作成（`@claude`メンション）
+- コードに関する質問への回答
 
 ### 開発
 
