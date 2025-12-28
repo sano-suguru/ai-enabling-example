@@ -38,30 +38,34 @@ npm run build
 # 5. Claude Desktopを再起動して、list_articlesツールを試す
 ```
 
-### CI統合を試す（フォーク）
+### AI自動レビューを試す（フォーク）
 
-このリポジトリをフォークして、Claude Code Actionsを体験できます：
+このリポジトリをフォークして、無料のAI自動レビューを体験できます：
 
 ```bash
 # 1. このリポジトリをGitHubでフォーク
 
-# 2. Claude Codeで以下を実行してGitHub Appをインストール
-# （Claude Code CLIまたはClaude Desktopから）
-/install-github-app
+# 2. Settings → Actions → General で権限を有効化
+#    ✅ Read and write permissions
+#    ✅ Allow GitHub Actions to create and approve pull requests
 
-# 3. GitHubリポジトリのSettings → Secrets and variables → Actions から
-# ANTHROPIC_API_KEY を追加（https://console.anthropic.com で取得）
+# 3. テストPRを作成
+git checkout -b test-ai-review
+echo "console.log('test');" > test.js
+git add . && git commit -m "test: AI review"
+git push origin test-ai-review
 
-# 4. フォークしたリポジトリでIssueを作成
-# 本文に @claude を含めると、Claudeが自動で実装してPRを作成
+# 4. GitHubでPRを作成 → AIが自動レビュー！
 
-# 5. PRを作成すると、Claudeが自動レビュー
+# 5. Issueで自動実装を試す
+#    Issueを作成して @ai-bot とメンション → 自動でPRが作成される
 ```
 
-**できること:**
-- PRの自動レビュー
-- Issueからの自動実装・PR作成（`@claude`メンション）
-- コードに関する質問への回答
+**特徴:**
+- 完全無料（GitHub Models使用）
+- 追加のAPIキー不要
+- PRの自動レビュー（コード品質、セキュリティ、パフォーマンス）
+- Issueからの自動実装・PR作成（`@ai-bot`メンション）
 
 ### 開発
 
@@ -111,6 +115,14 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 | CLAUDE.md | Claude Codeへの指示 | 詳細すぎると制約 ↔ 簡素すぎると意図不明 |
 | .cursorrules | Cursorへの指示 | 同上 |
 | CI統合 | 自動化 | 過度な自動化は品質低下 ↔ 手動は非効率 |
+
+### なぜGitHub Modelsか
+
+| 選択肢 | トレードオフ | 判断 |
+|--------|-------------|------|
+| Claude.ai (Anthropic API) | 高品質だがAPIキー・課金必要 | ❌ |
+| GitHub Copilot | 高品質だが月額料金必要 | ❌ |
+| GitHub Models | 無料、APIキー不要、複数モデル選択可能 | ✅ |
 
 ## 技術スタック
 

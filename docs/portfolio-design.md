@@ -30,8 +30,12 @@ ai-enabling-example/
   .cursorrules                   # Cursor用の指示
   .github/
     copilot-instructions.md      # Copilot用の指示
+    AI_REVIEW.md                 # AI自動レビューのガイド
     workflows/
-      claude.yml                 # PRレビュー + Issue自動実装
+      ai-review.yml              # PRレビュー + Issue自動実装（GitHub Models）
+    scripts/
+      ai-review.js               # PRレビューロジック
+      ai-implement.js            # Issue自動実装ロジック
 ```
 
 ---
@@ -43,8 +47,8 @@ ai-enabling-example/
 | 区分 | 内容 |
 |------|------|
 | プロジェクト本体 | Zenn記事検索MCPサーバー（list / search / get） |
-| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md |
-| CI統合 | PRへの自動レビュー、Issueからの自動実装（@claude） |
+| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md、AI_REVIEW.md |
+| CI統合 | PRへの自動レビュー、Issueからの自動実装（GitHub Models、@ai-bot） |
 | README | AI Enablingとは何か、設計判断の根拠（トレードオフ含む） |
 
 ### やらないこと
@@ -261,62 +265,72 @@ Zenn記事検索MCPサーバー。TypeScriptで実装。
 
 ---
 
-## 5. CI統合仕様（Claude Code Actions）
+## 5. CI統合仕様（GitHub Models）
 
 ### 5.1 セットアップ
 
-Claude Code CLIで `/install-github-app` を実行してセットアップ。
+Settings > Actions > General で権限を有効化:
+- Read and write permissions
+- Allow GitHub Actions to create and approve pull requests
 
-### 5.2 ワークフロー（.github/workflows/claude.yml）
+### 5.2 ワークフロー（.github/workflows/ai-review.yml）
 
 ```yaml
-name: Claude Code
+name: AI Code Review
 
 on:
-  issue_comment:
-    types: [created]
-  pull_request_review_comment:
-    types: [created]
-  issues:
-    types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
   pull_request:
     types: [opened, synchronize]
+  issue_comment:
+    types: [created]
 
 jobs:
-  claude-code:
+  ai-pr-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install openai@^4.0.0
+      - run: node .github/scripts/ai-review.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_MODEL: gpt-4o
+
+  ai-issue-implementation:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
-      github.event_name == 'pull_request'
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@ai-bot')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
-      id-token: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run Claude Code
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install openai@^4.0.0
+      - run: node .github/scripts/ai-implement.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_MODEL: gpt-4o
 ```
 
 ### 5.3 できること
 
 | 機能 | トリガー | 説明 |
 |------|----------|------|
-| PRレビュー | PR作成・更新時 | 自動でコードレビュー |
-| Issue実装 | `@claude` メンション | Issueの内容に基づいて実装・PR作成 |
-| 質問回答 | `@claude` メンション | コードに関する質問に回答 |
+| PRレビュー | PR作成・更新時 | 自動でコードレビュー（無料） |
+| Issue実装 | `@ai-bot` メンション | Issueの内容に基づいて実装・PR作成 |
+
+### 5.4 特徴
+
+- **完全無料**: GitHub Modelsの無料枠を使用（15req/min, 150req/day）
+- **APIキー不要**: GITHUB_TOKENで動作
+- **複数モデル**: gpt-4o, deepseek-r1, llama-3.3-70b-instructから選択可能
 
 ---
 
@@ -350,8 +364,9 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 ### CI統合を試す（フォーク）
 
 1. リポジトリをフォーク
-2. Claude Codeで `/install-github-app` 実行
-3. Issueを作成して `@claude` メンション
+2. Settings > Actions > General で権限を有効化
+3. PRを作成 → 自動レビュー
+4. Issueを作成して `@ai-bot` メンション → 自動実装
 
 ## AI Enablingとは
 
@@ -409,12 +424,13 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 - [ ] CLAUDE.md がある
 - [ ] .cursorrules がある
 - [ ] .github/copilot-instructions.md がある
-- [ ] .github/workflows/claude.yml がある
+- [ ] .github/AI_REVIEW.md がある
+- [ ] .github/workflows/ai-review.yml がある
 
 ### 7.3 CI統合
 
-- [ ] PRを作成するとClaudeが自動レビューする
-- [ ] Issueで `@claude` メンションすると実装・PR作成される
+- [ ] PRを作成するとAIが自動レビューする（GitHub Models）
+- [ ] Issueで `@ai-bot` メンションすると実装・PR作成される
 
 ### 7.4 README
 
@@ -449,10 +465,11 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 ### Phase 4: CI統合（1日）
 
-1. `/install-github-app` でセットアップ
-2. .github/workflows/claude.yml 作成
-3. PRレビュー動作確認
-4. Issue自動実装動作確認
+1. Settings > Actions > General で権限を有効化
+2. .github/workflows/ai-review.yml 作成
+3. .github/scripts/ai-review.js, ai-implement.js 実装
+4. PRレビュー動作確認
+5. Issue自動実装動作確認
 
 ### Phase 5: README仕上げ（1日）
 
@@ -468,8 +485,8 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 |----------|------|
 | 1. READMEを読む | AI Enablingとは何か、このプロジェクトで何をやったかを理解 |
 | 2. MCPサーバーを試す（ローカル） | `npm install` → `npm run build` → Claude Desktopで接続 → 記事検索 |
-| 3. AI Enabling成果物を確認 | CLAUDE.md、.cursorrules、CI統合を確認 |
-| 4. フォークしてCI統合を試す | `/install-github-app` → Issueで `@claude` → 自動実装を体験 |
+| 3. AI Enabling成果物を確認 | CLAUDE.md、.cursorrules、AI_REVIEW.md、CI統合を確認 |
+| 4. フォークしてCI統合を試す | Settings権限有効化 → Issueで `@ai-bot` → 自動実装を体験 |
 
 ---
 
@@ -487,8 +504,8 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 | 対象プロジェクト | Zenn記事検索MCPサーバー |
 | MCPサーバー機能 | list_articles、search_articles、get_article |
 | データ取得 | Zenn RSS |
-| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md、CI統合 |
-| CI統合 | PRレビュー、Issue自動実装（Claude MAX $100で追加費用なし） |
+| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md、AI_REVIEW.md、CI統合 |
+| CI統合 | PRレビュー、Issue自動実装（GitHub Models、完全無料） |
 | READMEの役割 | AI Enablingの説明 + 設計判断の根拠 |
 
 ---
@@ -499,5 +516,5 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 |----------|-----|
 | MCP公式ドキュメント | https://modelcontextprotocol.io/ |
 | MCP TypeScript SDK | https://github.com/modelcontextprotocol/typescript-sdk |
-| Claude Code Actions | https://docs.anthropic.com/claude-code/github-actions |
+| GitHub Models | https://github.blog/ai-and-ml/llms/solving-the-inference-problem-for-open-source-ai-projects-with-github-models/ |
 | Zenn RSS | https://zenn.dev/{username}/feed |

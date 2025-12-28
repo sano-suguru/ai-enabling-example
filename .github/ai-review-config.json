@@ -1,0 +1,41 @@
+{
+  "aiReview": {
+    "defaultModel": "gpt-4o",
+    "models": {
+      "gpt-4o": {
+        "description": "高精度、バランス型。一般的なコードレビューに最適",
+        "temperature": 0.3,
+        "maxTokens": 4000
+      },
+      "deepseek-r1": {
+        "description": "コーディング特化、高速。技術的な実装タスクに最適",
+        "temperature": 0.2,
+        "maxTokens": 6000
+      },
+      "llama-3.3-70b-instruct": {
+        "description": "オープンソース、高性能。コスト重視の場合に最適",
+        "temperature": 0.3,
+        "maxTokens": 4000
+      }
+    },
+    "review": {
+      "maxFiles": 20,
+      "maxFileSize": 10000,
+      "language": "ja",
+      "excludePatterns": [
+        "node_modules/**",
+        "dist/**",
+        "build/**",
+        "*.min.js",
+        "package-lock.json",
+        "yarn.lock"
+      ]
+    },
+    "implementation": {
+      "branchPrefix": "ai-bot/issue-",
+      "maxFilesToGenerate": 10,
+      "requireLabel": null,
+      "autoMerge": false
+    }
+  }
+}

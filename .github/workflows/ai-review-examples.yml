@@ -1,0 +1,100 @@
+# AI Review Examples - 複数モデルの比較
+# このワークフローは、異なるAIモデルを使った比較レビューを提供します
+
+name: AI Multi-Model Review (Example)
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # GPT-4oでレビュー
+  review-with-gpt4o:
+    if: contains(github.event.pull_request.labels.*.name, 'multi-review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install openai@^4.0.0
+
+      - name: Run GPT-4o Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_FULL_NAME: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AI_MODEL: gpt-4o
+        run: node .github/scripts/ai-review.js
+
+  # DeepSeek-R1でレビュー（コーディング特化）
+  review-with-deepseek:
+    if: contains(github.event.pull_request.labels.*.name, 'multi-review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install openai@^4.0.0
+
+      - name: Run DeepSeek-R1 Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_FULL_NAME: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AI_MODEL: deepseek-r1
+        run: node .github/scripts/ai-review.js
+
+  # Llama-3.3でレビュー（オープンソース）
+  review-with-llama:
+    if: contains(github.event.pull_request.labels.*.name, 'multi-review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install openai@^4.0.0
+
+      - name: Run Llama-3.3 Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_FULL_NAME: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AI_MODEL: llama-3.3-70b-instruct
+        run: node .github/scripts/ai-review.js
