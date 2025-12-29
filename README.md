@@ -222,7 +222,8 @@ npm install && npm run build
 | **zenn-search** | このプロジェクトのMCPサーバー | Node.js |
 | **[Context7](https://github.com/upstash/context7)** | ライブラリドキュメント検索 | npx |
 | **[Serena](https://github.com/oraios/serena)** | コードインデックス・セマンティック検索 | uvx |
-| **[GitHub](https://github.com/github/github-mcp-server)** | Issue/PR操作、リポジトリ管理 | Docker + PAT |
+
+**注**: [GitHub MCP](https://github.com/github/github-mcp-server)はPATが必要なため、ユーザースコープでの個人設定を推奨します。
 
 ### なぜMCPを統合するか
 
@@ -242,21 +243,19 @@ uvx --from git+https://github.com/oraios/serena serena project create . --langua
 uvx --from git+https://github.com/oraios/serena serena project index .
 ```
 
-### GitHub MCPのセットアップ
+### GitHub MCPのセットアップ（任意）
 
-GitHub MCPを使用するには、Docker と GitHub Personal Access Token（PAT）が必要です。
+GitHub MCPはPATが必要なため、**ユーザースコープ**での個人設定を推奨します。
 
 ```bash
 # 1. Dockerがインストールされていることを確認
 docker --version
 
-# 2. direnvをインストール（推奨）
-brew install direnv
-echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+# 2. ユーザースコープでGitHub MCPを追加
+claude mcp add github --scope user -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server
 
-# 3. .envrcファイルを作成（gitignore済み）
-echo 'export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here' > .envrc
-direnv allow .
+# 3. ~/.claude.jsonを編集してPATを設定
+# "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here" }
 
 # 4. Claude Codeを再起動
 ```
