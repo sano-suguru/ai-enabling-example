@@ -250,10 +250,15 @@ GitHub MCPを使用するには、Docker と GitHub Personal Access Token（PAT�
 # 1. Dockerがインストールされていることを確認
 docker --version
 
-# 2. GitHub PATを環境変数に設定
-export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
+# 2. direnvをインストール（推奨）
+brew install direnv
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
 
-# 3. Claude Codeを再起動
+# 3. .envrcファイルを作成（gitignore済み）
+echo 'export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here' > .envrc
+direnv allow .
+
+# 4. Claude Codeを再起動
 ```
 
 PATには以下のスコープを推奨：
