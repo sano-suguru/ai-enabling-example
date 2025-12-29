@@ -128,6 +128,24 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 | GitHub Copilot | 高品質だが月額料金必要 | ❌ |
 | GitHub Models | 無料、APIキー不要、複数モデル選択可能 | ✅ |
 
+### なぜ自前スクリプト（.cjs）か
+
+| 選択肢 | トレードオフ | 判断 |
+|--------|-------------|------|
+| Claude Code Actions | 公式、高品質だが有料（Pro/Team必要） | ❌ |
+| GitHub Copilot Autofix | ネイティブ統合だが有料（Copilot必要） | ❌ |
+| 自前スクリプト + GitHub Models | 完全無料、カスタマイズ可能だが保守が必要 | ✅ |
+
+## 技術構成
+
+### CI統合の仕組み
+
+- **ワークフロー**: [.github/workflows/ai-review.yml](.github/workflows/ai-review.yml)でPR/Issueイベントをトリガー
+- **レビューロジック**: [.github/scripts/ai-review.cjs](.github/scripts/ai-review.cjs)でdiffを取得しAIに送信
+- **実装ロジック**: [.github/scripts/ai-implement.cjs](.github/scripts/ai-implement.cjs)でIssue内容を解析しコード生成・PR作成
+- **AI基盤**: GitHub Models API（OpenAI互換エンドポイント: `https://models.inference.ai.azure.com`）
+- **認証**: Personal Access Token（`AI_GITHUB_TOKEN` secret）
+
 ## 技術スタック
 
 - **言語**: TypeScript
