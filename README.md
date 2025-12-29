@@ -182,6 +182,36 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 - **AI基盤**: GitHub Models API（OpenAI互換エンドポイント: `https://models.inference.ai.azure.com`）
 - **認証**: Personal Access Token（`AI_GITHUB_TOKEN` secret）
 
+## MCPツール仕様
+
+| ツール | 説明 | 入力 | 出力 |
+|--------|------|------|------|
+| `list_articles` | 記事一覧取得 | `username: string`, `limit?: number` | `articles: Article[]` |
+| `search_articles` | キーワード検索 | `username: string`, `query: string` | `articles: Article[]` |
+| `get_article` | 記事本文取得 | `url: string` | `title`, `content`, `url` |
+
+### Article型
+
+```typescript
+{
+  title: string;        // 記事タイトル
+  url: string;          // 記事URL
+  publishedAt: string;  // 公開日時（ISO 8601）
+  description?: string; // 記事の概要
+}
+```
+
+### Claude Codeで使う
+
+このリポジトリをクローンすると、`.mcp.json`により自動的にMCPサーバーが認識されます。
+
+```bash
+git clone https://github.com/sano-suguru/ai-enabling-example.git
+cd ai-enabling-example
+npm install && npm run build
+# Claude Codeを再起動すると、zenn-searchツールが利用可能に
+```
+
 ## 技術スタック
 
 - **言語**: TypeScript
