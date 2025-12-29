@@ -8,6 +8,7 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 - **CLAUDE.md / .cursorrules / copilot-instructions.md**: AIツール用の指示
 - **GitHub Actions統合**: PRレビュー、Issue自動実装
+- **.mcp.json**: Claude Code用MCP統合（Context7、Serena）
 
 ## Quickstart
 
@@ -210,6 +211,33 @@ git clone https://github.com/sano-suguru/ai-enabling-example.git
 cd ai-enabling-example
 npm install && npm run build
 # Claude Codeを再起動すると、zenn-searchツールが利用可能に
+```
+
+## MCP統合（.mcp.json）
+
+このプロジェクトでは、Claude Codeの開発効率を高めるために以下のMCPサーバーを導入しています。
+
+| MCP | 用途 | コマンド |
+|-----|------|---------|
+| **zenn-search** | このプロジェクトのMCPサーバー | `node build/index.js` |
+| **[Context7](https://github.com/upstash/context7)** | ライブラリドキュメント検索 | `npx -y @upstash/context7-mcp` |
+| **[Serena](https://github.com/oraios/serena)** | コードインデックス・セマンティック検索 | `uvx --from git+https://github.com/oraios/serena serena start-mcp-server` |
+
+### なぜMCPを統合するか
+
+| 課題 | 解決策 |
+|------|--------|
+| Claude Codeはライブラリの最新ドキュメントを知らない | Context7で最新ドキュメントを取得 |
+| Claude Codeにはコードインデックス機能がない | Serenaでセマンティック検索を追加 |
+
+### Serenaのセットアップ
+
+```bash
+# プロジェクトを初期化
+uvx --from git+https://github.com/oraios/serena serena project create . --language typescript
+
+# インデックスを作成
+uvx --from git+https://github.com/oraios/serena serena project index .
 ```
 
 ## 技術スタック
