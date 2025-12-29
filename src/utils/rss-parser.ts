@@ -23,13 +23,9 @@ export interface ZennArticle {
 /**
  * RSS-Parserのカスタムフィールド型定義
  */
-interface CustomFeed {
-  // 現時点ではカスタムフィールドなし
-}
+type CustomFeed = Record<string, never>;
 
-interface CustomItem {
-  // 現時点ではカスタムフィールドなし
-}
+type CustomItem = Record<string, never>;
 
 // RSS Parserインスタンスの作成
 const parser: Parser<CustomFeed, CustomItem> = new Parser();

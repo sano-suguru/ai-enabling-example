@@ -1,20 +1,53 @@
 # Zenn Article Search MCP Server
 
-AI Enablingを実践したサンプルプロジェクト
+AI Enablingを適用したサンプルプロジェクト
+
+## 目的
+
+このリポジトリは、**小さく理解しやすいMCPサーバー（Zenn記事検索）**を題材に、AI Enabling（AIが文脈を理解して開発支援しやすい状態づくり）のための成果物（指示ファイル、CI、ドキュメント）をまとめたポートフォリオです。
+
+## 評価者の体験（最短）
+
+1. READMEを読む（何を・なぜやったか）
+2. ローカルでMCPサーバーを試す（Quickstart）
+3. AI Enabling成果物を確認（指示ファイル・CI統合）
+  - [AGENTS.md](AGENTS.md)
+   - [CLAUDE.md](CLAUDE.md)
+   - [.github/copilot-instructions.md](.github/copilot-instructions.md)
+   - [.github/AI_REVIEW.md](.github/AI_REVIEW.md)
+   - [.github/workflows/ci.yml](.github/workflows/ci.yml)（build / test / lint）
+   - [.github/workflows/ai-review.yml](.github/workflows/ai-review.yml)（AIレビュー / 自動実装）
+4. フォークしてCI統合を体験（PRを作ってCIが緑になる → AI自動レビュー / Issue自動実装）
 
 ## このリポジトリについて
 
 Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用しています：
 
-- **CLAUDE.md / .cursorrules / copilot-instructions.md**: AIツール用の指示
+- **AGENTS.md / CLAUDE.md / .github/copilot-instructions.md**: AIツール用の指示
 - **GitHub Actions統合**: PRレビュー、Issue自動実装
 - **.mcp.json**: Claude Code用MCP統合（Context7、Serena）
+
+## 指示ファイルの構成（AGENTS.md集約）
+
+複数のAIツール（Cursor / GitHub Copilot / Claude Code）で指示の乖離を起こしにくくするため、**ツール横断で共有したい一次情報を [AGENTS.md](AGENTS.md) に集約**しています。
+
+ただし、各ツールの「どのファイルを自動で読むか」は完全には一致しません。そのため、以下のファイルは互換のために**最小限の重要事項だけを残す**運用にしています。
+
+- [AGENTS.md](AGENTS.md): 共通の一次情報（規約、コマンド、構成、テスト方針など）
+- [CLAUDE.md](CLAUDE.md): Claude Code が起動時に読む指示（最小限＋AGENTS.md参照）
+- [.github/copilot-instructions.md](.github/copilot-instructions.md): Copilot が読む指示（最小限＋AGENTS.md参照）
+
+Cursor は [AGENTS.md](AGENTS.md) を参照してください。
+
+更新の原則：まず [AGENTS.md](AGENTS.md) を更新し、必要な場合のみ他の指示ファイルの「最重要」セクションも同期します。
 
 ## Quickstart
 
 ### MCPサーバーを試す（ローカル）
 
 ```bash
+# 前提: Node.js 20+
+
 # 1. クローン
 git clone https://github.com/sano-suguru/ai-enabling-example.git
 cd ai-enabling-example
@@ -117,19 +150,18 @@ npm run dev
 # テスト実行
 npm test
 
+# 手動の疎通テスト（外部ネットワークに依存）
+npm run test:manual
+
 # Lint
 npm run lint
 ```
 
 ## AI Enablingとは
 
-AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cursor、GitHub Copilotなど）がプロジェクトのコンテキストを理解し、効果的に開発支援できるようにするための取り組みです。
+このREADMEでは、AI Enablingを「AIツール（Claude Code、Cursor、GitHub Copilotなど）が、プロジェクト固有の前提を取り違えにくくなるようにするための整備」として説明します。
 
-### なぜ重要か
-
-- **開発効率の向上**: AIがプロジェクト固有の規約や構造を理解することで、より適切な提案が可能に
-- **品質の維持**: 一貫したコーディング規約やアーキテクチャパターンの適用
-- **オンボーディングの加速**: 新しい開発者（人間・AI）がプロジェクトを素早く理解できる
+このリポジトリでは、規約・構造・実行コマンド・CI・成果物の場所を揃えることで、変更が検証しやすい状態を作ることを意図しています。
 
 ## 設計判断の根拠
 
@@ -153,8 +185,9 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 
 | 成果物 | 目的 | トレードオフ |
 |--------|------|-------------|
+| AGENTS.md | ツール横断の一次情報（規約・コマンド等）を集約 | すべてのツールが同一に解釈するとは限らない |
 | CLAUDE.md | Claude Codeへの指示 | 詳細すぎると制約 ↔ 簡素すぎると意図不明 |
-| .cursorrules | Cursorへの指示 | 同上 |
+| .github/copilot-instructions.md | Copilotへの指示 | 同上 |
 | CI統合 | 自動化 | 過度な自動化は品質低下 ↔ 手動は非効率 |
 
 ### なぜGitHub Modelsか
@@ -177,6 +210,7 @@ AI Enabling（AI支援開発の実現）とは、AIツール（Claude Code、Cur
 
 ### CI統合の仕組み
 
+- **基本CI**: [.github/workflows/ci.yml](.github/workflows/ci.yml)でbuild/test/lintを自動実行
 - **ワークフロー**: [.github/workflows/ai-review.yml](.github/workflows/ai-review.yml)でPR/Issueイベントをトリガー
 - **レビューロジック**: [.github/scripts/ai-review.cjs](.github/scripts/ai-review.cjs)でdiffを取得しAIに送信
 - **実装ロジック**: [.github/scripts/ai-implement.cjs](.github/scripts/ai-implement.cjs)でIssue内容を解析しコード生成・PR作成
@@ -282,3 +316,12 @@ PATには以下のスコープを推奨：
 ## ライセンス
 
 MIT
+
+## 完成条件（Acceptance Criteria）
+
+- `npm install` で依存関係がインストールされる
+- `npm run build` でビルドされる
+- `npm test` が通る（CI向け：外部ネットワークに依存しない）
+- `npm run test:manual` で手動疎通ができる（外部ネットワークに依存）
+- `npm run lint` が通る
+- Claude Desktop / Cursor で接続でき、`list_articles` / `search_articles` / `get_article` が動作する

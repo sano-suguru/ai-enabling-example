@@ -34,7 +34,7 @@ tests/
 ```
 
 ## AI Enabling成果物
+- AGENTS.md - ツール横断の一次情報（Cursorも参照）
 - CLAUDE.md - Claude Code用指示
-- .cursorrules - Cursor用指示
 - .github/copilot-instructions.md - GitHub Copilot用指示
 - .github/workflows/ai-review.yml - AI自動レビュー・自動実装

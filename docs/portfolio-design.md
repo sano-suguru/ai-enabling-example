@@ -26,16 +26,21 @@ ai-enabling-example/
   tsconfig.json
   
   # AI Enabling成果物（実際に使われている状態）
+  AGENTS.md                      # ツール横断の一次情報（Cursorも参照）
   CLAUDE.md                      # Claude Code用の指示
-  .cursorrules                   # Cursor用の指示
   .github/
     copilot-instructions.md      # Copilot用の指示
     AI_REVIEW.md                 # AI自動レビューのガイド
+    ai-review-config.json         # AIレビュー/自動実装の設定
     workflows/
       ai-review.yml              # PRレビュー + Issue自動実装（GitHub Models）
+      ai-review-examples.yml     # 例（検証/参考用）
+      ci.yml                     # build/test/lint のCI
     scripts/
       ai-review.cjs              # PRレビューロジック
       ai-implement.cjs           # Issue自動実装ロジック
+      test-setup.cjs             # テスト補助
+    skills/                      # 再利用しやすい知識（スキル）
 ```
 
 ---
@@ -47,8 +52,8 @@ ai-enabling-example/
 | 区分 | 内容 |
 |------|------|
 | プロジェクト本体 | Zenn記事検索MCPサーバー（list / search / get） |
-| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md、AI_REVIEW.md |
-| CI統合 | PRへの自動レビュー、Issueからの自動実装（GitHub Models、@ai-bot） |
+| AI Enabling成果 | AGENTS.md、CLAUDE.md、.github/copilot-instructions.md、AI_REVIEW.md |
+| CI統合 | build/test/lint のCI + 残骸禁止のガードレール + PRへの自動レビュー、Issueからの自動実装（GitHub Models、@ai-bot） |
 | README | AI Enablingとは何か、設計判断の根拠（トレードオフ含む） |
 
 ### やらないこと
@@ -188,80 +193,21 @@ server.registerTool(
 
 このプロジェクトでClaude Codeを使うための指示。
 
-```markdown
-# CLAUDE.md
+設計方針として、ツール横断で共有する一次情報はルートの `AGENTS.md` に集約し、`CLAUDE.md` は「Claude Codeが確実に読むべき最小限の重要事項」の重複に留める（参照リンクの追従が保証されないため）。
 
-## プロジェクト概要
-Zenn記事検索MCPサーバー。AI Enablingの実践サンプル。
+実体は `CLAUDE.md` を参照。
 
-## 技術スタック
-- TypeScript
-- Node.js 20.x
-- MCP SDK（@modelcontextprotocol/sdk）
+### 4.2 AGENTS.md
 
-## ディレクトリ構成
-- src/: ソースコード
-- src/tools/: MCPツール実装
-- tests/: テスト
+Cursor / Copilot / Claude Code で共通化できる一次情報（規約・コマンド・構成など）は `AGENTS.md` に集約する。
 
-## コマンド
-- `npm install`: 依存関係インストール
-- `npm run build`: ビルド
-- `npm run dev`: 開発サーバー起動
-- `npm test`: テスト実行
-- `npm run lint`: lint実行
-
-## コーディング規約
-- 関数にはJSDocコメントを付ける
-- エラーハンドリングは必ず行う
-- 新規関数には単体テストを書く
-
-## 注意事項
-- 外部APIキーは使用しない（RSSのみ）
-- console.logではなくloggerを使う
-```
-
-### 4.2 .cursorrules
-
-```markdown
-# Project Rules
-
-## 概要
-Zenn記事検索MCPサーバー。TypeScriptで実装。
-
-## コーディング規約
-- TypeScriptを使用
-- 関数にはJSDocコメントを付ける
-- エラーハンドリングは必ず行う
-- async/awaitを使用（コールバック不可）
-
-## テスト
-- 新規関数には単体テストを書く
-- テストファイルは tests/ に配置
-
-## セキュリティ
-- 環境変数は直接コードに書かない
-- 外部入力は必ずバリデーション
-```
+加えて、「後方互換/削除予定の残骸を残さない（不要コード・設定は削除し参照も更新）」を運用ルールとして明文化する。
 
 ### 4.3 .github/copilot-instructions.md
 
-```markdown
-# Copilot Instructions
+設計方針として、`AGENTS.md` を一次情報の集約先としつつ、Copilotが確実に読むべき重要事項を最小限だけ重複して書く。
 
-## General
-- Use TypeScript for all code
-- Follow functional programming patterns where appropriate
-- Write comprehensive error handling
-
-## Testing
-- Write unit tests for new functions
-- Use descriptive test names
-
-## Security
-- Never hardcode secrets
-- Validate all external inputs
-```
+実体は `.github/copilot-instructions.md` を参照。
 
 ---
 
@@ -273,6 +219,8 @@ Settings > Actions > General で権限を有効化:
 - Read and write permissions
 - Allow GitHub Actions to create and approve pull requests
 
+加えて、GitHub Models にアクセスできるトークンをリポジトリの Secrets に設定する（ワークフローは `AI_GITHUB_TOKEN` を参照）。
+
 ### 5.2 ワークフロー（.github/workflows/ai-review.yml）
 
 ```yaml
@@ -280,7 +228,7 @@ name: AI Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
   issue_comment:
     types: [created]
 
@@ -293,11 +241,16 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - run: npm install openai@^4.0.0
-      - run: node .github/scripts/ai-review.js
+      - run: node .github/scripts/ai-review.cjs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
           AI_MODEL: gpt-4o
 
   ai-issue-implementation:
@@ -313,9 +266,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - run: npm install openai@^4.0.0
-      - run: node .github/scripts/ai-implement.js
+      - run: node .github/scripts/ai-implement.cjs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
           AI_MODEL: gpt-4o
 ```
 
@@ -328,9 +281,9 @@ jobs:
 
 ### 5.4 特徴
 
-- **完全無料**: GitHub Modelsの無料枠を使用（15req/min, 150req/day）
-- **APIキー不要**: GITHUB_TOKENで動作
-- **複数モデル**: gpt-4o, deepseek-r1, llama-3.3-70b-instructから選択可能
+- **APIキーの取り扱いを最小化**: GitHub Modelsにアクセス可能なトークンを Secrets（例: `AI_GITHUB_TOKEN`）として管理
+- **複数モデル**: gpt-4o, deepseek-r1, llama-3.3-70b-instruct から選択可能
+- **注意**: 利用可能なモデルやレート制限/料金は環境・契約・時期によって変動しうるため、最新の公式情報を参照する
 
 ---
 
@@ -349,7 +302,7 @@ AI Enablingを実践したサンプルプロジェクト。
 
 Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用しています：
 
-- **CLAUDE.md / .cursorrules / copilot-instructions.md**: AIツール用の指示
+- **AGENTS.md / CLAUDE.md / .github/copilot-instructions.md**: AIツール用の指示
 - **GitHub Actions統合**: PRレビュー、Issue自動実装
 
 ## Quickstart
@@ -394,8 +347,9 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 | 成果物 | 目的 | トレードオフ |
 |--------|------|-------------|
+| AGENTS.md | ツール横断の一次情報を集約 | すべてのツールが同一に解釈するとは限らない |
 | CLAUDE.md | Claude Codeへの指示 | 詳細すぎると制約になる ↔ 簡素すぎると意図が伝わらない |
-| .cursorrules | Cursorへの指示 | 同上 |
+| .github/copilot-instructions.md | Copilotへの指示 | 同上 |
 | CI統合 | 自動化 | 過度な自動化は品質低下 ↔ 手動では効率悪い |
 
 ## 参考リソース
@@ -422,7 +376,7 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 ### 7.2 AI Enabling成果物
 
 - [ ] CLAUDE.md がある
-- [ ] .cursorrules がある
+- [ ] AGENTS.md がある
 - [ ] .github/copilot-instructions.md がある
 - [ ] .github/AI_REVIEW.md がある
 - [ ] .github/workflows/ai-review.yml がある
@@ -459,8 +413,8 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 
 ### Phase 3: AI Enabling成果物（1日）
 
-1. CLAUDE.md
-2. .cursorrules
+1. AGENTS.md
+2. CLAUDE.md
 3. .github/copilot-instructions.md
 
 ### Phase 4: CI統合（1日）
@@ -485,7 +439,7 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 |----------|------|
 | 1. READMEを読む | AI Enablingとは何か、このプロジェクトで何をやったかを理解 |
 | 2. MCPサーバーを試す（ローカル） | `npm install` → `npm run build` → Claude Desktopで接続 → 記事検索 |
-| 3. AI Enabling成果物を確認 | CLAUDE.md、.cursorrules、AI_REVIEW.md、CI統合を確認 |
+| 3. AI Enabling成果物を確認 | AGENTS.md、CLAUDE.md、AI_REVIEW.md、CI統合を確認 |
 | 4. フォークしてCI統合を試す | Settings権限有効化 → Issueで `@ai-bot` → 自動実装を体験 |
 
 ---
@@ -504,8 +458,8 @@ Zenn記事検索MCPサーバーに対して、以下のAI Enablingを適用し�
 | 対象プロジェクト | Zenn記事検索MCPサーバー |
 | MCPサーバー機能 | list_articles、search_articles、get_article |
 | データ取得 | Zenn RSS |
-| AI Enabling成果 | CLAUDE.md、.cursorrules、copilot-instructions.md、AI_REVIEW.md、CI統合 |
-| CI統合 | PRレビュー、Issue自動実装（GitHub Models、完全無料） |
+| AI Enabling成果 | AGENTS.md、CLAUDE.md、.github/copilot-instructions.md、AI_REVIEW.md、CI統合 |
+| CI統合 | PRレビュー、Issue自動実装（GitHub Models） |
 | READMEの役割 | AI Enablingの説明 + 設計判断の根拠 |
 
 ---
