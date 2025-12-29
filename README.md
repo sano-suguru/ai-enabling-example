@@ -217,11 +217,12 @@ npm install && npm run build
 
 このプロジェクトでは、Claude Codeの開発効率を高めるために以下のMCPサーバーを導入しています。
 
-| MCP | 用途 | コマンド |
-|-----|------|---------|
-| **zenn-search** | このプロジェクトのMCPサーバー | `node build/index.js` |
-| **[Context7](https://github.com/upstash/context7)** | ライブラリドキュメント検索 | `npx -y @upstash/context7-mcp` |
-| **[Serena](https://github.com/oraios/serena)** | コードインデックス・セマンティック検索 | `uvx --from git+https://github.com/oraios/serena serena start-mcp-server` |
+| MCP | 用途 | 依存 |
+|-----|------|------|
+| **zenn-search** | このプロジェクトのMCPサーバー | Node.js |
+| **[Context7](https://github.com/upstash/context7)** | ライブラリドキュメント検索 | npx |
+| **[Serena](https://github.com/oraios/serena)** | コードインデックス・セマンティック検索 | uvx |
+| **[GitHub](https://github.com/github/github-mcp-server)** | Issue/PR操作、リポジトリ管理 | Docker + PAT |
 
 ### なぜMCPを統合するか
 
@@ -229,6 +230,7 @@ npm install && npm run build
 |------|--------|
 | Claude Codeはライブラリの最新ドキュメントを知らない | Context7で最新ドキュメントを取得 |
 | Claude Codeにはコードインデックス機能がない | Serenaでセマンティック検索を追加 |
+| GitHub操作（Issue/PR）を自然言語で行いたい | GitHub MCPでAPI操作を実行 |
 
 ### Serenaのセットアップ
 
@@ -239,6 +241,24 @@ uvx --from git+https://github.com/oraios/serena serena project create . --langua
 # インデックスを作成
 uvx --from git+https://github.com/oraios/serena serena project index .
 ```
+
+### GitHub MCPのセットアップ
+
+GitHub MCPを使用するには、Docker と GitHub Personal Access Token（PAT）が必要です。
+
+```bash
+# 1. Dockerがインストールされていることを確認
+docker --version
+
+# 2. GitHub PATを環境変数に設定
+export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
+
+# 3. Claude Codeを再起動
+```
+
+PATには以下のスコープを推奨：
+- `repo` - リポジトリへのフルアクセス
+- `read:org` - 組織情報の読み取り
 
 ## 技術スタック
 
