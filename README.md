@@ -38,6 +38,42 @@ npm run build
 # 5. Claude Desktopを再起動して、list_articlesツールを試す
 ```
 
+### MCPツールの動作例
+
+#### list_articles - 記事一覧取得
+
+```
+Zennユーザー「zenn」の記事を5件取得してください
+```
+
+| # | タイトル | 公開日 |
+|---|----------|--------|
+| 1 | [記事のAIレビュー機能の使い方](https://zenn.dev/zenn/articles/how-to-use-ai-review) | 2025/08/20 |
+| 2 | [PublicationにGitHubリポジトリを連携してZennのコンテンツを管理する](https://zenn.dev/zenn/articles/connect-to-github-publication) | 2025/01/15 |
+| 3 | [ZennをPWAとして使用する](https://zenn.dev/zenn/articles/how-to-use-pwa) | 2024/10/02 |
+| 4 | [Publication Proの機能と管理](https://zenn.dev/zenn/articles/publication-pro-features) | 2023/12/18 |
+| 5 | [再設定用のメールアドレスを設定する](https://zenn.dev/zenn/articles/recovery-email) | 2023/07/10 |
+
+#### search_articles - キーワード検索
+
+```
+Zennユーザー「zenn」の記事から「Markdown」で検索してください
+```
+
+| # | タイトル |
+|---|----------|
+| 1 | [Zenn CLIで記事・本を管理する方法](https://zenn.dev/zenn/articles/zenn-cli-guide) |
+| 2 | [Zennのスラッグ（slug）とは](https://zenn.dev/zenn/articles/what-is-slug) |
+| 3 | [ZennのMarkdown記法一覧](https://zenn.dev/zenn/articles/markdown-guide) |
+
+#### get_article - 記事本文取得
+
+```
+https://zenn.dev/zenn/articles/markdown-guide の記事本文を取得してください
+```
+
+記事のタイトルとHTML本文が返されます。
+
 ### AI自動レビューを試す（フォーク）
 
 このリポジトリをフォークして、無料のAI自動レビューを体験できます。

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "zenn-search": {
+      "command": "node",
+      "args": ["build/index.js"]
+    }
+  }
+}
